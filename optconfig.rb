@@ -1,4 +1,4 @@
-# $Id: optconfig.rb,v 1.1.1.1 2004-09-27 14:29:02 tommy Exp $
+# $Id: optconfig.rb,v 1.2 2005-01-17 09:49:30 tommy Exp $
 #
 # Copyright (C) 2004 TOMITA Masahiro
 # tommy@tmtm.org
@@ -107,6 +107,13 @@ class OptConfig
     end
     i = 0
     while i < argv.size do
+      if argv[i] == "--" then
+        i += 1
+        break
+      end
+      if argv[i] == "-" then
+        break
+      end
       if argv[i][0,2] == "--" then
         a = argv[i][2..-1]
         if a.include? "=" then
