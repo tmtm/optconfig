@@ -18,6 +18,7 @@
 <!--
     <h2>ダウンロード</h2>
     <ul>
+      <li><a href="optconfig-0.2.tar.gz">optconfig-0.2.tar.gz</a>
       <li><a href="optconfig-0.1.tar.gz">optconfig-0.1.tar.gz</a>
     </ul>
 -->
@@ -28,6 +29,8 @@
       OptConfig#parse でオプションを解釈します。
       OptConfig#parse は解釈できた引数の個数を返します。
       オプションに設定された値は OptConfig#[] で取り出せます。
+      「--」はオプションの解釈をそこで中断します。
+      「-」はオプションではなく通常の引数として解釈されます。
     </p>
     <pre>
 opt = OptConfig.new
@@ -74,6 +77,7 @@ opt["opt1"]                   # => "value1"
       <dd>
 	OptConfig オブジェクトを生成して返します。
     </dl>
+
     <h2>インスタンスメソッド</h2>
     <dl>
       <dt>OptConfig#options=<em>hash</em>
@@ -110,11 +114,21 @@ opt["opt1"]                   # => "value1"
       <dd>
 	{optname=>value, ...} のHashオブジェクトを返します。
     </dl>
+
+    <h2>履歴</h2>
+    <dl>
+      <dt>0.2 2005-01-17
+      <dd>
+	<ul>
+	  <li>「--」「-」を解釈するようにした。
+	</ul>
+    </dl>
+
     <hr>
     <address><a href="mailto:tommy@tmtm.org">TOMITA Masahiro</a></address>
 <!-- Created: Fri May 28 21:22:33 JST 2004 -->
 <!-- hhmts start -->
-Last modified: Mon Sep 27 23:26:32 JST 2004
+Last modified: Mon Jan 17 18:48:55 JST 2005
 <!-- hhmts end -->
   </body>
 </html>
