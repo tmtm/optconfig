@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>OptConfig</title>
+    <link rel=stylesheet type="text/css" href="tommy.css">
+    <link rev=made href="mailto:tommy@tmtm.org">
+  </head>
+
+  <body>
+    <h1>OptConfig</h1>
+
+    <p>
+      OptConfig はオプション引数を処理するためのライブラリです。
+      設定ファイルに記述したオプションを読み込むこともできます。
+    </p>
+
+<!--
+    <h2>ダウンロード</h2>
+    <ul>
+      <li><a href="optconfig-0.1.tar.gz">optconfig-0.1.tar.gz</a>
+    </ul>
+-->
+
+    <h2>使い方</h2>
+    <p>
+      OptConfig.new でオブジェクトを作成し、OptConfig#options= で指定可能なオプションを設定します。
+      OptConfig#parse でオプションを解釈します。
+      OptConfig#parse は解釈できた引数の個数を返します。
+      オプションに設定された値は OptConfig#[] で取り出せます。
+    </p>
+    <pre>
+opt = OptConfig.new
+opt.options = {"a"=>true, "b"=>nil, "c"=>/^\d+$/}
+opt.parse(["-a", "hoge", "-b", "-c99", "arg1"])   # => 4
+opt["a"]              # => "hoge"
+opt["b"]              # => true
+opt["c"]              # => "99"
+</pre>
+    <p>
+      options= で指定していないオプションが parse に渡された時は OptConfig::Error 例外が発生します。
+    </p>
+    <p>
+      オプションはファイルから読み込むこともできます。
+      OptConfig#file= でファイル名を指定してから OptConfig#parse します。
+      ファイルの内容は次の形式です。
+    </p>
+    <pre>
+optname = value
+</pre>
+    <p>
+      オプション名と値の間の「=」は空白文字でも構いません。
+    </p>
+    <p>
+      また、ファイル中に [識別子] を置くことで、識別子以降のオプションのみを読み込むことができます。
+    </p>
+    <pre>
+[ident1]
+opt1 = value1
+
+[ident2]
+opt2 = value2
+</pre>
+    <pre>
+opt.file = "/path/to/optfile"
+opt.idlist = ["ident1"]       # 識別子を "ident1" に設定
+opt.parse([])                 # opt1 のみ読み込み
+opt["opt1"]                   # => "value1"
+</pre>
+
+    <h2>クラスメソッド</h2>
+    <dl>
+      <dt>OptConfig.new()
+      <dd>
+	OptConfig オブジェクトを生成して返します。
+    </dl>
+    <h2>インスタンスメソッド</h2>
+    <dl>
+      <dt>OptConfig#options=<em>hash</em>
+      <dd>
+	指定可能なオプションの規則をHashで指定します。
+	Hash のキーはオプション名文字列で、値は次のいずれかです。
+	<table>
+	    <tr><td>nil または false<td>オプションの引数なし
+	    <tr><td>true<td>オプションの引数あり
+	    <tr><td>正規表現<td>オプションの引数の形式を指定
+	</table>
+
+      <dt>OptConfig#idlist=[<em>id</em>, ...]
+      <dd>
+	オプションファイルから読み込むセクション名の配列を指定します。
+
+      <dt>OptConfig#file=<em>filename</em>
+      <dd>
+	オプションが書かれたファイル名を指定します。
+
+      <dt>OptConfig#parse([<em>arg</em>, ...])
+      <dd>
+	引数を解釈します。オプション形式の引数の数を返します。
+
+      <dt>OptConfig#[<em>optname</em>]
+      <dd>
+	オプションの値を返します。
+
+      <dt>OptConfig#key?(<em>optname</em>)
+      <dd>
+	オプションが指定されていれば真。
+
+      <dt>OptConfig#hash
+      <dd>
+	{optname=>value, ...} のHashオブジェクトを返します。
+    </dl>
+    <hr>
+    <address><a href="mailto:tommy@tmtm.org">TOMITA Masahiro</a></address>
+<!-- Created: Fri May 28 21:22:33 JST 2004 -->
+<!-- hhmts start -->
+Last modified: Mon Sep 27 23:26:32 JST 2004
+<!-- hhmts end -->
+  </body>
+</html>
