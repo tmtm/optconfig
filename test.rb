@@ -1,69 +1,178 @@
 #!/usr/local/bin/ruby
-# $Id: test.rb,v 1.1.1.1 2004-09-27 14:29:02 tommy Exp $
+# $Id: test.rb,v 1.2 2005-06-28 15:10:29 tommy Exp $
 # Copyright (C) 2004 TOMITA Masahiro
 # tommy@tmtm.org
 #
 
+require "test/unit"
 require "./optconfig.rb"
 
-o = OptConfig.new
-o.options = {"a" => [nil, nil], "b" => [true, nil], "c" => [/xyz/, "xyz"]}
-raise "error" unless o.parse(["-a", "b", "c"]) == 1
-raise "error" unless o["a"] == true
-begin
-  o.parse(["-x"])
-  raise "error"
-rescue OptConfig::Error
+class TC_OptConfig < Test::Unit::TestCase
+  def setup()
+    @o = OptConfig.new
+  end
+  def teardown()
+  end
+
+  def test_noarg()
+    @o.options = {
+      "a" => nil,
+    }
+    assert_equal(0, @o.parse(["a","b","c"]))
+    assert_equal(nil, @o["a"])
+
+    assert_equal(1, @o.parse(["-a","b","c"]))
+    assert_equal(true, @o["a"])
+
+    assert_equal(1, @o.parse(["--a","b","c"]))
+    assert_equal(true, @o["a"])
+  end
+
+  def test_needarg()
+    @o.options = {
+      "a" => true,
+    }
+    assert_equal(0, @o.parse(["a","b","c"]))
+    assert_equal(nil, @o["a"])
+
+    assert_raises(OptConfig::Error){@o.parse(["-a"])}
+
+    assert_equal(2, @o.parse(["-a", "b", "c"]))
+    assert_equal("b", @o["a"])
+
+    assert_equal(1, @o.parse(["-ab", "c"]))
+    assert_equal("b", @o["a"])
+
+    assert_equal(1, @o.parse(["--a=b","c"]))
+    assert_equal("b", @o["a"])
+
+    assert_equal(2, @o.parse(["--a", "b","c"]))
+    assert_equal("b", @o["a"])
+
+    assert_equal(1, @o.parse(["--a=","b","c"]))
+    assert_equal("", @o["a"])
+  end
+
+  def test_long_noarg()
+    @o.options = {
+      "long" => nil,
+    }
+    assert_equal(0, @o.parse(["long","b","c"]))
+    assert_equal(nil, @o["long"])
+
+    assert_raises(OptConfig::Error){@o.parse(["-long","b","c"])}
+
+    assert_equal(1, @o.parse(["--long","b","c"]))
+    assert_equal(true, @o["long"])
+  end
+
+  def test_long_needarg()
+    @o.options = {
+      "long" => true,
+    }
+    assert_equal(0, @o.parse(["long","b","c"]))
+    assert_equal(nil, @o["long"])
+
+    assert_raises(OptConfig::Error){@o.parse(["--long"])}
+
+    assert_equal(2, @o.parse(["--long","b","c"]))
+    assert_equal("b", @o["long"])
+
+    assert_equal(1, @o.parse(["--long=b","c"]))
+    assert_equal("b", @o["long"])
+
+    assert_equal(1, @o.parse(["--long=","b","c"]))
+    assert_equal("", @o["long"])
+
+    assert_raises(OptConfig::Error){@o.parse(["-long","b","c"])}
+  end
+
+  def test_regexp()
+    @o.options = {
+      "long" => /^abc$/
+    }
+    assert_equal(2, @o.parse(["--long", "abc", "def"]))
+    assert_equal("abc", @o["long"])
+
+    assert_raises(OptConfig::Error){@o.parse(["--long", "xyz", "def"])}
+
+    assert_equal(1, @o.parse(["--long=abc", "def"]))
+    assert_equal("abc", @o["long"])
+
+    assert_raises(OptConfig::Error){@o.parse(["--long=xyz", "def"])}
+  end
+
+  def test_multioption()
+    @o.options = {
+      "a" => nil,
+      "b" => nil,
+    }
+    assert_equal(2, @o.parse(["-a", "-b", "c"]))
+    assert_equal(true, @o["a"])
+    assert_equal(true, @o["b"])
+
+    assert_equal(1, @o.parse(["-ab", "c"]))
+    assert_equal(true, @o["a"])
+    assert_equal(true, @o["b"])
+  end
+
+  def test_multiname()
+    @o.options = {
+      ["opt1", "opt2"] => true,
+    }
+
+    assert_equal(1, @o.parse(["--opt2=abc"]))
+    assert_equal("abc", @o["opt1"])
+    assert_equal("abc", @o["opt2"])
+  end
+
+  def test_file()
+    require "tempfile"
+    tmpf = Tempfile.new("optconfig-test")
+    tmpf.puts <<EOS
+hoge = fuga
+hage=gege
+EOS
+    tmpf.flush
+    @o.options = {}
+    @o.file = tmpf.path
+    assert_equal(0, @o.parse([]))
+
+    @o.options = {
+      "hoge" => true,
+      "hage" => true,
+      "a" => true,
+    }
+    assert_equal(2, @o.parse(["-a", "abc"]))
+    assert_equal("fuga", @o["hoge"])
+    assert_equal("gege", @o["hage"])
+    assert_equal("abc", @o["a"])
+    tmpf.close!
+  end
+
+  def test_idlist()
+    require "tempfile"
+    tmpf = Tempfile.new("optconfig-test")
+    tmpf.puts <<EOS
+[opt1]
+abc = def
+[opt2]
+xyz = 987
+EOS
+    tmpf.flush
+    @o.file = tmpf.path
+    @o.options = {
+      "abc" => true,
+      "xyz" => true,
+    }
+    @o.idlist = ["opt1"]
+    assert_equal(0, @o.parse([]))
+    assert_equal("def", @o["abc"])
+    assert_equal(nil, @o["xyz"])
+    @o.idlist = ["opt1", "opt2"]
+    assert_equal(0, @o.parse([]))
+    assert_equal("def", @o["abc"])
+    assert_equal("987", @o["xyz"])
+    tmpf.close!
+  end
 end
-begin
-  o.parse(["-axyz"])
-  raise "error"
-rescue OptConfig::Error
-end
-o.parse(["-abc"])
-raise "error" unless o["a"] == true and o["b"] == "c"
-o.parse(["-c", "xyz"])
-o.parse(["-cxyz"])
-o.parse(["-c", "xyz987"])
-o.parse(["-cxyz987"])
-o.parse(["-c", "123xyz987"])
-o.parse(["-c123xyz987"])
-
-o.options = {"long-option1" => [nil, nil], "long-option2" => [true, nil], "long-option3" => [/xyz/, "xyz"]}
-raise "error" unless o.parse(["--long-option1", "--long-option2=a", "--long-option3", "xyzabc"]) == 4
-raise "error" unless o["long-option1"] == true and o["long-option2"] == "a" and o["long-option3"] == "xyzabc"
-raise "error" unless o.parse(["--long-option1", "aaa"]) == 1 and o["long-option3"] == "xyz"
-begin
-  o.parse(["--long-option1=aaa"])
-  raise "error"
-rescue OptConfig::Error
-end
-
-o.options = {["opt1", "opt2"] => [true, nil]}
-o.parse(["--opt2=abc"])
-raise "error" unless o["opt1"] == "abc"
-
-require "tempfile"
-tmpf = Tempfile.new("optconfig-test")
-tmpf.puts "hoge = fuga\nhage=gege\n"
-tmpf.flush
-o.options = {}
-o.file = tmpf.path
-o.parse([])
-o.options = {"hoge" => [true, nil], "hage" => [true, nil], "a" => [true, nil]}
-o.parse(["-a", "abc"])
-raise "error" unless o["hoge"] == "fuga" and o["hage"] == "gege" and o["a"] == "abc"
-tmpf.close
-
-tmpf = Tempfile.new("optconfig-test")
-tmpf.puts "[opt1]\nabc=def\n[opt2]\nxyz=987\n"
-tmpf.flush
-o.options = {"abc" => [true, nil], "xyz" => [true, nil]}
-o.file = tmpf.path
-o.idlist = ["opt1"]
-o.parse([])
-raise "error" unless o["abc"] == "def" and not o.key? "xyz"
-o.idlist = ["opt1", "opt2"]
-o.parse([])
-raise "error" unless o["abc"] == "def" and o["xyz"] == "987"
-tmpf.close
