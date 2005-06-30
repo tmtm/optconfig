@@ -1,6 +1,6 @@
-# $Id: optconfig.rb,v 1.2 2005-01-17 09:49:30 tommy Exp $
+# $Id: optconfig.rb,v 1.3 2005-06-30 05:52:16 tommy Exp $
 #
-# Copyright (C) 2004 TOMITA Masahiro
+# Copyright (C) 2004-2005 TOMITA Masahiro
 # tommy@tmtm.org
 #
 
@@ -27,9 +27,11 @@ class OptConfig
     @idlist = nil
     @options = {}
     @values = {}
+    @ignore_unknown_file_option = true
   end
 
   attr_writer :file, :idlist
+  attr_accessor :ignore_unknown_file_option
 
   def [](n)
     return nil unless @name.key? n
@@ -85,7 +87,7 @@ class OptConfig
     end
   end
 
-  def parse(argv)
+  def parse(argv=[])
     @values = {}
     @options.each do |n, v|
       @values[n] = v[1] if v[1]
@@ -101,7 +103,10 @@ class OptConfig
         end
         next if @idlist and not @idlist.include? @section
         n, v = l.chomp.split(/\s*=\s*|\s+/, 2)
-        next unless @name.key? n
+        unless @name.key? n then
+          raise Error, "unknown option: #{n}" unless @ignore_unknown_file_option
+          next
+        end
         @values[@name[n]] = check(n, v)
       end
     end
@@ -152,5 +157,11 @@ class OptConfig
       i += 1
     end
     return i
+  end
+
+  def parse!(argv=[])
+    n = parse(argv)
+    argv.slice!(0, n)
+    return n
   end
 end

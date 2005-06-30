@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby
-# $Id: test.rb,v 1.2 2005-06-28 15:10:29 tommy Exp $
+# $Id: test.rb,v 1.3 2005-06-30 05:52:16 tommy Exp $
 # Copyright (C) 2004 TOMITA Masahiro
 # tommy@tmtm.org
 #
@@ -126,6 +126,18 @@ class TC_OptConfig < Test::Unit::TestCase
     assert_equal("abc", @o["opt2"])
   end
 
+  def test_parseB()
+    @o.options = {
+      "a" => true,
+      "opt" => nil,
+    }
+    arg = ["-a", "b", "--opt", "c"]
+    assert_equal(3, @o.parse!(arg))
+    assert_equal("b", @o["a"])
+    assert_equal(true, @o["opt"])
+    assert_equal(["c"], arg)
+  end
+
   def test_file()
     require "tempfile"
     tmpf = Tempfile.new("optconfig-test")
@@ -175,4 +187,22 @@ EOS
     assert_equal("987", @o["xyz"])
     tmpf.close!
   end
+
+  def test_file_unknown()
+    require "tempfile"
+    tmpf = Tempfile.new("optconfig-test")
+    tmpf.puts <<EOS
+hoge = fuga
+unkonwn = xxx
+EOS
+    tmpf.flush
+    @o.options = {"hoge" => true}
+    @o.file = tmpf.path
+    @o.ignore_unknown_file_option = true
+    @o.parse
+
+    @o.ignore_unknown_file_option = false
+    assert_raises(OptConfig::Error){@o.parse}
+  end
+
 end

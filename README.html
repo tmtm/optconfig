@@ -18,6 +18,7 @@
 <!--
     <h2>ダウンロード</h2>
     <ul>
+      <li><a href="optconfig-0.2.1.tar.gz">optconfig-0.2.1.tar.gz</a>
       <li><a href="optconfig-0.2.tar.gz">optconfig-0.2.tar.gz</a>
       <li><a href="optconfig-0.1.tar.gz">optconfig-0.1.tar.gz</a>
     </ul>
@@ -70,6 +71,9 @@ opt.idlist = ["ident1"]       # 識別子を "ident1" に設定
 opt.parse([])                 # opt1 のみ読み込み
 opt["opt1"]                   # => "value1"
 </pre>
+    <p>
+      デフォルトでは、ファイル中に未知のオプションがあってもエラーにはならず無視されます。
+    </p>
 
     <h2>クラスメソッド</h2>
     <dl>
@@ -98,9 +102,20 @@ opt["opt1"]                   # => "value1"
       <dd>
 	オプションが書かれたファイル名を指定します。
 
+      <dt>OptConfig#ignore_unknown_file_option=<em>flag</em>
+      <dd>
+	true の場合はファイル中の未知のオプションを無視します。
+	false の場合は OptConfig::Error 例外が発生します。
+	デフォルトは true です。
+
       <dt>OptConfig#parse([<em>arg</em>, ...])
       <dd>
 	引数を解釈します。オプション形式の引数の数を返します。
+
+      <dt>OptConfig#parse!([<em>arg</em>, ...])
+      <dd>
+	引数を解釈します。オプション形式の引数の数を返します。
+	引数の配列はオプションとして解釈された要素が削除されます。
 
       <dt>OptConfig#[<em>optname</em>]
       <dd>
@@ -117,6 +132,14 @@ opt["opt1"]                   # => "value1"
 
     <h2>履歴</h2>
     <dl>
+      <dt>0.3 2005-06-30
+      <dd>
+	<ul>
+	  <li>parse() の引数を省略可能にした。
+	  <li>parse!() の追加。
+	  <li>ignore_unknown_file_option 追加。
+	</ul>
+
       <dt>0.2 2005-01-17
       <dd>
 	<ul>
@@ -128,7 +151,7 @@ opt["opt1"]                   # => "value1"
     <address><a href="mailto:tommy@tmtm.org">TOMITA Masahiro</a></address>
 <!-- Created: Fri May 28 21:22:33 JST 2004 -->
 <!-- hhmts start -->
-Last modified: Mon Jan 17 18:48:55 JST 2005
+Last modified: Thu Jun 30 14:48:51 JST 2005
 <!-- hhmts end -->
   </body>
 </html>
