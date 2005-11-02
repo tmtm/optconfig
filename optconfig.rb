@@ -1,4 +1,4 @@
-# $Id: optconfig.rb,v 1.3 2005-06-30 05:52:16 tommy Exp $
+# $Id: optconfig.rb,v 1.4 2005-11-02 00:48:50 tommy Exp $
 #
 # Copyright (C) 2004-2005 TOMITA Masahiro
 # tommy@tmtm.org
@@ -97,7 +97,7 @@ class OptConfig
       IO.foreach(@file) do |l|
         l.chomp!
         next if l[0, 1] == "#" or l =~ /^\s*$/
-        if l =~ /\[([a-z0-9_-]+)\]/i then
+        if l =~ /^\[([a-z0-9_-]+)\]$/i then
           @section = $1
           next
         end

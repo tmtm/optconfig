@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby
-# $Id: test.rb,v 1.3 2005-06-30 05:52:16 tommy Exp $
+# $Id: test.rb,v 1.4 2005-11-02 00:48:50 tommy Exp $
 # Copyright (C) 2004 TOMITA Masahiro
 # tommy@tmtm.org
 #
@@ -167,6 +167,33 @@ EOS
     tmpf = Tempfile.new("optconfig-test")
     tmpf.puts <<EOS
 [opt1]
+abc = def
+[opt2]
+xyz = 987
+EOS
+    tmpf.flush
+    @o.file = tmpf.path
+    @o.options = {
+      "abc" => true,
+      "xyz" => true,
+    }
+    @o.idlist = ["opt1"]
+    assert_equal(0, @o.parse([]))
+    assert_equal("def", @o["abc"])
+    assert_equal(nil, @o["xyz"])
+    @o.idlist = ["opt1", "opt2"]
+    assert_equal(0, @o.parse([]))
+    assert_equal("def", @o["abc"])
+    assert_equal("987", @o["xyz"])
+    tmpf.close!
+  end
+
+  def test_idlist2()
+    require "tempfile"
+    tmpf = Tempfile.new("optconfig-test")
+    tmpf.puts <<EOS
+[opt1]
+hoge = [xxx]
 abc = def
 [opt2]
 xyz = 987
