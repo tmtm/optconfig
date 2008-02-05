@@ -9,4 +9,4 @@ test:
 	ruby -I. spec/optconfig_spec.rb
 
 doc: lib/optconfig.rb
-	rdoc -c utf-8 lib/optconfig.rb
+	rdoc -t OptConfig -c utf-8 lib/optconfig.rb
