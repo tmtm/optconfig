@@ -3,6 +3,9 @@
 # mailto:tommy@tmtm.org
 #
 # = OptConfig
+# Author:: TOMITA Masahiro <tommy@tmtm.org>
+# License:: Ruby's. see http://www.ruby-lang.org/en/LICENSE.txt
+#
 # * OptConfig はコマンドラインオプションのパーサです。
 # * ファイルからオプションを読み込むこともできます。
 # * -s 形式と --long-option 形式の両方を扱うことができます。
@@ -10,7 +13,18 @@
 # * usage に使用する文字列を自動的に生成します。
 # * オプションの引数の形式を指定できます。
 #
-# == 使用法
+# == Download
+# * http://rubyforge.org/frs/?group_id=4777
+# * http://tmtm.org/downloads/ruby/optconfig/
+#
+# == Required
+# * StringValidator http://stringvalidator.rubyforge.org/
+#
+# == Install
+#  $ make
+#  # make install
+#
+# == Usage
 #  require "optconfig"
 #  opt = OptConfig.new
 #  opt.option "p", "port=num", :format=>1..65535, :default=>110, :description=>"port number (%s)"
@@ -33,7 +47,7 @@
 #    -h, --hostname=name    hostname (192.168.1.1)
 #    --hogehoge             enable hogehoge flag
 #
-# == オプション定義
+# === オプション定義
 # OptConfig#option でオプションを定義します。
 # 引数は、オプション名のリストと、オプションの属性を表す Hash です。
 # [オプション名]
@@ -82,7 +96,7 @@
 #   ブロック引数は、オプション名, Option オブジェクト, オプション引数です。
 #   ブロックの評価結果はオプション引数として使用されます。
 #
-# == オプションファイル
+# === オプションファイル
 # parse よりも前に file= でファイル名を指定するか、OptConfig.new 時に
 # :file 属性を指定すると、そのファイルからオプションを読み込みます。ファ
 # イルで指定されたオプションよりも、parse の引数で指定されたオプション
