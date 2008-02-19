@@ -191,8 +191,13 @@ class OptConfig
     option.each do |k,v|
       v = [v] unless v.is_a? Array
       arg = k.to_a
-      arg.concat({:flag=>v[0], :default=>v[1]})
-      Option.new *arg
+      arg.push({:format=>v[0], :default=>v[1]})
+      opt = Option.new *arg
+      opt.name.each do |n|
+        raise "option #{n} is already defined" if @options.key? n
+        @options[n] = opt
+      end
+      @option_seq << opt
     end
     @obsolete_behavior = true
     option
@@ -203,6 +208,7 @@ class OptConfig
   # === 戻り値
   # argv:: 残りの引数
   def parse!(argv=[])
+    orig_argv_size = argv.size
     ret = []
     @options.each_key do |k|
       @options[k].value = @options[k].default
@@ -231,7 +237,7 @@ class OptConfig
     end
 
     if @obsolete_behavior
-      n = argv.size - ret.size
+      n = orig_argv_size - ret.size
       argv.replace ret
       return n
     end

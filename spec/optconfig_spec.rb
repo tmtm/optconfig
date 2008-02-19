@@ -772,6 +772,21 @@ EOS
   end
 end
 
+describe ':underscore_is_hyphen=>true で "--no-" prefix の場合' do
+  before do
+    @opt = OptConfig.new
+    @opt.option "long-opt", :format=>:boolean, :argument=>false, :underscore_is_hyphen=>true
+  end
+  it '--long_opt 指定で true' do
+    @opt.parse(["--long_opt"])
+    @opt["long-opt"].should == true
+  end
+  it '--no_long_opt 指定で false' do
+    @opt.parse(["--no_long_opt"])
+    @opt["long-opt"].should == false
+  end
+end
+
 describe ':in_config=>false を指定' do
   before do
     @opt = OptConfig.new
@@ -850,5 +865,51 @@ describe ':pre_proc' do
   it 'オプション引数の正当性確認前に実行される' do
     proc{@opt.parse(["-p", "xxx"])}.should raise_error(OptConfig::InvalidArgument, "invalid argument for option `p': invalid value: xxx")
     @cnt.should == 1
+  end
+end
+
+describe 'options= でオプション設定' do
+  before do
+    @opt = OptConfig.new
+    @opt.options = {
+      "a" => nil,
+      "b" => false,
+      "c" => true,
+      "long" => true,
+      "long2" => [true, "abc"],
+      "long3" => /abc/,
+      ["d", "long4"] => true,
+    }
+  end
+  it 'nil の場合は引数なし' do
+    @opt.parse(["-a", "a"]).should == 1
+    @opt["a"].should == true
+  end
+  it 'false の場合は引数なし' do
+    @opt.parse(["-b", "a"]).should == 1
+    @opt["b"].should == true
+  end
+  it 'true の場合は引数あり' do
+    @opt.parse(["-c", "a"]).should == 2
+    @opt["c"].should == "a"
+  end
+  it '長いオプション名も使用可能' do
+    @opt.parse(["--long", "a"]).should == 2
+    @opt["long"].should == "a"
+  end
+  it 'オプションが指定されなくても引数のデフォルト値が有効' do
+    @opt.parse(["a"]).should == 0
+    @opt["long2"].should == "abc"
+  end
+  it '引数の形式を指定可能' do
+    @opt.parse(["--long3", "bcabcab"]).should == 2
+    @opt["long3"].should == "bcabcab"
+  end
+  it '引数の形式に合わなければエラー' do
+    proc{@opt.parse(["--long3", "hogehoge"])}.should raise_error(OptConfig::InvalidArgument, "invalid argument for option `long3': regexp mismatch: hogehoge")
+  end
+  it '同じオプションに短い名前と長い名前を指定可能' do
+    @opt.parse(["-d", "a"]).should == 2
+    @opt["long4"].should == "a"
   end
 end
