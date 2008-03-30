@@ -410,6 +410,16 @@ EOS
   end
 end
 
+describe '=付きの長いオプションの #usage' do
+  it '出力される' do
+    opt = OptConfig.new
+    opt.option "long=hoge", :description=>"long option description"
+    opt.usage.should == <<EOS
+  --long=hoge             long option description
+EOS
+  end
+end
+
 describe '短いオプションと長いオプションの混在 #usage' do
   it '出力される' do
     opt = OptConfig.new

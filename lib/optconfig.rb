@@ -296,7 +296,7 @@ class OptConfig
       next unless opt.description
       short = []
       long = []
-      opt.name.each do |n|
+      opt.usage_name.each do |n|
         if n.size == 1
           short << "-#{n}"
         else
@@ -474,6 +474,7 @@ class OptConfig
       end
       raise "no option name: #{args.inspect}" if name.empty?
       argument = nil
+      @usage_name = name
       @name = name.to_a.map do |n|
         unless n =~ /\A([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_-]+)(\[?=.*)?\z/
           raise "invalid option name: #{n.inspect}"
@@ -496,6 +497,7 @@ class OptConfig
     end
     attr_reader :name, :argument, :format, :default, :description, :multiple
     attr_reader :completion, :underscore_is_hyphen, :in_config, :proc, :pre_proc
+    attr_reader :usage_name
     attr_accessor :value
 
     def may_not_take_argument?
