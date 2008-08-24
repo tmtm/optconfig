@@ -459,7 +459,7 @@ class OptConfig
   # AmbiguousOption
   def long_option_completion(opt)
     return opt if @options.key? opt
-    candidate = @options.keys.sort.select{|k| opt == k[0, opt.size]}
+    candidate = @options.keys.sort.select{|k| opt == k[0, opt.size]}.select{|k| @options[k].completion}
     raise AmbiguousOption, "ambiguous option: #{opt} (candidate are #{candidate.join(", ")})" if candidate.size > 1
     return nil if candidate.empty? or not @options[candidate.first].completion
     return candidate.first

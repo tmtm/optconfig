@@ -374,11 +374,12 @@ describe '長いオプションが途中まで指定された場合' do
   it '曖昧であれば AmbiguousOption 例外になる' do
     proc{@opt.parse(["--long"])}.should raise_error(OptConfig::AmbiguousOption, 'ambiguous option: long (candidate are longfuga, longhoge)')
   end
-  it ':completion=>false 指定時は補完されない' do
+  it ':completion=>false 指定時は補完対象にならない' do
     opt = OptConfig.new
     opt.option "longhoge", :completion=>false
     opt.option "longfuga"
-    proc{opt.parse(["--longh"])}.should raise_error(OptConfig::UnknownOption, 'unknown option: longh')
+    opt.parse(["--long"])
+    opt["longfuga"].should == true
   end
 end
 
