@@ -390,6 +390,14 @@ describe '説明がないオプションの #usage' do
   end
 end
 
+describe '説明が空文字列のオプションの #usage' do
+  it 'オプション名のみ出力される' do
+    opt = OptConfig.new
+    opt.option "x", :description=>""
+    opt.usage.should == "  -x\n"
+  end
+end
+
 describe '短いオプションの #usage' do
   it '出力される' do
     opt = OptConfig.new

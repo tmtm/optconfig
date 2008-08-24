@@ -304,6 +304,10 @@ class OptConfig
         end
       end
       line = "  "+(short+long).join(", ")
+      if opt.description.empty?
+        ret << line+"\n"
+        next
+      end
       if line.length >= 25
         line << "\n                          "
       else
