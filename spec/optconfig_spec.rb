@@ -809,7 +809,7 @@ end
 describe ':in_config=>false を指定' do
   before do
     @opt = OptConfig.new
-    @opt.option "long", :format=>true, :in_config=>false
+    @opt.option "long", :format=>"hoge", :in_config=>false
   end
   it '引数に書けば有効' do
     @opt.parse(["--long", "hoge"])
@@ -819,6 +819,16 @@ describe ':in_config=>false を指定' do
     tmpf = Tempfile.new "optconfig"
     tmpf.puts <<EOS
 long = hoge
+EOS
+    tmpf.close
+    @opt.file = tmpf.path
+    @opt.parse
+    @opt["long"].should be_nil
+  end
+  it '設定ファイル内で形式違反の値が指定されていても無視' do
+    tmpf = Tempfile.new "optconfig"
+    tmpf.puts <<EOS
+long = fuga
 EOS
     tmpf.close
     @opt.file = tmpf.path

@@ -270,8 +270,9 @@ class OptConfig
         if @section.nil? or @section.empty? or @section.to_a.include? cur_sect
           name, value = line.split(/\s*=\s*|\s+/, 2)
           begin
-            opt = parse_long_opt "#{name}=#{value}", [], false
-            opt.value = opt.default unless opt.in_config
+            name, = long_option name, false
+            break unless @options[name].in_config
+            parse_long_opt "#{name}=#{value}", [], false
           rescue UnknownOption
             raise unless @ignore_unknown_file_option
           end
