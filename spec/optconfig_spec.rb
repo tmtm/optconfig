@@ -696,6 +696,11 @@ describe ':multiple=>false を指定' do
     opt.option "s", :format=>true, :multiple=>false
     proc{opt.parse(["-s","123","-s","abc"])}.should raise_error(OptConfig::DuplicatedOption, "duplicated option: s")
   end
+  it '異なる名前でも同じオプションであれば複数指定でエラー' do
+    opt = OptConfig.new
+    opt.option "s", "long", :format=>true, :multiple=>false
+    proc{opt.parse(["-s","123","--long","abc"])}.should raise_error(OptConfig::DuplicatedOption, "duplicated option: long")
+  end
 end
 
 describe ':multiple=>true を指定' do

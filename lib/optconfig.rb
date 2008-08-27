@@ -335,18 +335,18 @@ class OptConfig
     raise UnknownOption, "unknown option: #{name}" unless @options.key? name
     opt = @options[name]
     value = opt.pre_proc.call name, opt, value if opt.pre_proc
-    raise DuplicatedOption, "duplicated option: #{name}" if !opt.multiple and @specified[name]
+    raise DuplicatedOption, "duplicated option: #{name}" if !opt.multiple and @specified[@options[name]]
     value = check_option name, value unless value == true or value == false
     value = opt.proc.call name, opt, value if opt.proc
     if opt.multiple == :last
       opt.value = value
     elsif opt.multiple
-      opt.value = [] unless @specified[name]
+      opt.value = [] unless @specified[@options[name]]
       opt.value << value
     else
       opt.value = value
     end
-    @specified[name] = true
+    @specified[@options[name]] = true
   end
 
   # == オプション名と値の正当性を確認
@@ -378,7 +378,7 @@ class OptConfig
   # argv:: それ以降の文字列配列
   # completion:: 補完の有無
   # === 戻り値
-  # OptConfig オブジェクト
+  # Option オブジェクト
   def parse_long_opt(name, argv, completion=true)
     if name.include? "="
       n, v = name.split "=", 2
@@ -403,7 +403,7 @@ class OptConfig
   # name:: オプション名
   # argv:: それ以降の文字列配列
   # === 戻り値
-  # OptConfig オブジェクト
+  # Option オブジェクト
   def parse_short_opt(name, argv)
     arg = name.dup
     until arg.empty?
