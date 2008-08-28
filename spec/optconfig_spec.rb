@@ -334,7 +334,7 @@ describe ':format=>:boolean & argument=>true の場合' do
     @opt["long"].should == true
   end
   it '1文字のオプションには "--no-" prefix はつけられない' do
-    proc{@opt.parse(["--no-s"])}.should raise_error(OptConfig::UnknownOption)
+    proc{@opt.parse(["--no-s"])}.should raise_error(OptConfig::UnknownOption, "unknown option: no-s")
   end
 end
 
@@ -350,6 +350,40 @@ describe ':default を設定した場合' do
   it 'オプションを指定しないとデフォルト値になる' do
     @opt.parse()
     @opt["s"].should == "abc"
+  end
+end
+
+describe ':default 値が指定されて、:format が文字列を返さない場合' do
+  before do
+    @opt = OptConfig.new
+    @hostport = proc do |s|
+      h, p = s.split ":", 2
+      h = StringValidator.validate /\A[a-z0-9.-]+\z/, h.to_s
+      p = StringValidator.validate 1..65535, p.to_s
+      [h, p]
+    end
+  end
+  it 'デフォルト値もパースされる' do
+    @opt.option "s", :format=>@hostport, :default=>"localhost:123"
+    @opt.parse
+    @opt["s"].should == ["localhost", 123]
+  end
+  it 'usage の %s は文字列のまま' do
+    @opt.option "s", :format=>@hostport, :default=>"localhost:123", :description=>"%s"
+    @opt.usage.should == "  -s                      localhost:123\n"
+    @opt.parse(["-s", "hoge:80"])
+    @opt.usage.should == "  -s                      hoge:80\n"
+    @opt["s"].should == ["hoge", 80]
+  end
+  it ':format に合わない :default はそのまま' do
+    @opt.option "s", :format=>@hostport, :default=>"123"
+    @opt.parse
+    @opt["s"].should == "123"
+  end
+  it 'String でない :default もそのまま' do
+    @opt.option "s", :format=>@hostport, :default=>123
+    @opt.parse
+    @opt["s"].should == 123
   end
 end
 

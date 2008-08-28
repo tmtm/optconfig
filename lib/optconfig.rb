@@ -210,10 +210,15 @@ class OptConfig
   def parse!(argv=[])
     orig_argv_size = argv.size
     ret = []
-    @options.each_key do |k|
-      @options[k].value = @options[k].default
-    end
     @specified.clear
+    @option_seq.each do |opt|
+      opt.value = opt.ovalue = opt.default
+      begin
+        opt.value = check_option opt.name.first, opt.default if opt.default.is_a? String
+      rescue OptConfig::Error
+        # 無視
+      end
+    end
     parse_file @file if @file
     @specified.clear
 
@@ -314,7 +319,7 @@ class OptConfig
       else
         line << " "*(26-line.length)
       end
-      desc = opt.description.gsub(/%s/, opt.value.to_s).split "\n"
+      desc = opt.description.gsub(/%s/, opt.ovalue.to_s).split "\n"
       line << desc.shift+"\n"
       desc.each do |d|
         line << "                          #{d}\n"
@@ -328,23 +333,27 @@ class OptConfig
 
   # == オプションに値を設定
   # name:: オプション名
-  # value:: 値
+  # value:: 値(String,true,false)
   # === 例外
   # UnknownOption, DuplicatedOption
   def set_option(name, value)
     raise UnknownOption, "unknown option: #{name}" unless @options.key? name
     opt = @options[name]
+    ovalue = value
     value = opt.pre_proc.call name, opt, value if opt.pre_proc
     raise DuplicatedOption, "duplicated option: #{name}" if !opt.multiple and @specified[@options[name]]
     value = check_option name, value unless value == true or value == false
     value = opt.proc.call name, opt, value if opt.proc
-    if opt.multiple == :last
+    if opt.multiple == :last or !opt.multiple
       opt.value = value
-    elsif opt.multiple
-      opt.value = [] unless @specified[@options[name]]
-      opt.value << value
+      opt.ovalue = ovalue
     else
-      opt.value = value
+      unless @specified[@options[name]]
+        opt.value = []
+        opt.ovalue = []
+      end
+      opt.value << value
+      opt.ovalue << ovalue
     end
     @specified[@options[name]] = true
   end
@@ -352,6 +361,8 @@ class OptConfig
   # == オプション名と値の正当性を確認
   # name:: オプション名
   # value:: 値 (String)
+  # === 戻り値
+  # _value_ の評価結果
   # === 例外
   # UnnecessaryArgument, ArgumentRequired, InvalidArgument
   def check_option(name, value)
@@ -499,11 +510,12 @@ class OptConfig
       @proc = attr[:proc]
       @pre_proc = attr[:pre_proc]
       @value = @default
+      @ovalue = @default
     end
     attr_reader :name, :argument, :format, :default, :description, :multiple
     attr_reader :completion, :underscore_is_hyphen, :in_config, :proc, :pre_proc
     attr_reader :usage_name
-    attr_accessor :value
+    attr_accessor :value, :ovalue
 
     def may_not_take_argument?
       argument == false or argument == :optional or (argument.nil? and !format)
