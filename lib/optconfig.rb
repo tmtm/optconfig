@@ -276,7 +276,7 @@ class OptConfig
           name, value = line.split(/\s*=\s*|\s+/, 2)
           begin
             name, = long_option name, false
-            break unless @options[name].in_config
+            raise UnknownOption, "unknown option: #{name}" unless @options[name].in_config
             parse_long_opt "#{name}=#{value}", [], false
           rescue UnknownOption
             raise unless @ignore_unknown_file_option

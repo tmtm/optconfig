@@ -697,6 +697,18 @@ EOS
     @opt.file = tmpf.path
     proc{@opt.parse}.should raise_error(OptConfig::UnknownOption, "unknown option: long2")
   end
+  it '定義済みのオプションでも :in_config=>false であれば OptConfig::UnknownOption 例外になる' do
+    @opt = OptConfig.new
+    @opt.ignore_unknown_file_option = false
+    @opt.option "s", "long", :argument=>true, :in_config=>false
+    tmpf = Tempfile.new "optconfig"
+    tmpf.puts <<EOS
+long = hoge
+EOS
+    tmpf.close
+    @opt.file = tmpf.path
+    proc{@opt.parse}.should raise_error(OptConfig::UnknownOption, "unknown option: long")
+  end
 end
 
 describe 'オプションの二重定義' do
