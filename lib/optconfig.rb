@@ -1,5 +1,5 @@
 # $Id$
-# Copyright (C) 2004-2008 TOMITA Masahiro
+# Copyright (C) 2004-2009 TOMITA Masahiro
 # mailto:tommy@tmtm.org
 #
 # = OptConfig
@@ -277,7 +277,11 @@ class OptConfig
           begin
             name, = long_option name, false
             raise UnknownOption, "unknown option: #{name}" unless @options[name].in_config
-            parse_long_opt "#{name}=#{value}", [], false
+            if value
+              parse_long_opt "#{name}=#{value}", [], false
+            else
+              parse_long_opt name, [], false
+            end
           rescue UnknownOption
             raise unless @ignore_unknown_file_option
           end

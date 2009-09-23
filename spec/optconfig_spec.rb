@@ -571,6 +571,7 @@ describe 'オプションをファイルで指定した場合' do
   before do
     @opt = OptConfig.new
     @opt.option "s", "long", :argument=>true
+    @opt.option "no-arg", :argument=>false
   end
   it 'オプションがファイルから読み込まれる' do
     tmpf = Tempfile.new "optconfig"
@@ -604,6 +605,17 @@ EOS
     @opt.file = tmpf.path
     @opt.parse
     @opt["long"].should == nil
+  end
+  it '引数を取らないオプションもOK' do
+    tmpf = Tempfile.new "optconfig"
+    tmpf.puts <<EOS
+# コメント
+no-arg
+EOS
+    tmpf.close
+    @opt.file = tmpf.path
+    @opt.parse
+    @opt["no-arg"].should == true
   end
 end
 
