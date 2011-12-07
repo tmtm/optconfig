@@ -1,5 +1,5 @@
-# $Id$
-# Copyright (C) 2004-2009 TOMITA Masahiro
+# -*- coding: utf-8 -*-
+# Copyright (C) 2004-2011 TOMITA Masahiro
 # mailto:tommy@tmtm.org
 #
 # = OptConfig
@@ -13,16 +13,11 @@
 # * usage に使用する文字列を自動的に生成します。
 # * オプションの引数の形式を指定できます。
 #
-# == Download
-# * http://rubyforge.org/frs/?group_id=4777
-# * http://tmtm.org/downloads/ruby/optconfig/
-#
-# == Required
-# * StringValidator http://stringvalidator.rubyforge.org/
-#
 # == Install
-#  $ make
-#  # make install
+#  $ gem install optconfig
+#
+# == Repository
+#  https://github.com/tmtm/optconfig
 #
 # == Usage
 #  require "optconfig"
@@ -149,7 +144,7 @@ class OptConfig
     @option_seq = []
     @options = {}
     @file = default_attr[:file]
-    @section = default_attr[:section]
+    @section = default_attr[:section] && [default_attr[:section]].flatten
     @stop_at_non_option_argument = default_attr[:stop_at_non_option_argument]
     @ignore_unknown_file_option = default_attr.key?(:ignore_unknown_file_option) ? default_attr[:ignore_unknown_file_option] : true
     @obsolete_behavior = false
@@ -190,7 +185,7 @@ class OptConfig
     @option_seq.clear
     option.each do |k,v|
       v = [v] unless v.is_a? Array
-      arg = k.to_a
+      arg = k.is_a?(Array) ? k : [k]
       arg.push({:format=>v[0], :default=>v[1]})
       opt = Option.new *arg
       opt.name.each do |n|
@@ -272,7 +267,7 @@ class OptConfig
           cur_sect = $1
           next
         end
-        if @section.nil? or @section.empty? or @section.to_a.include? cur_sect
+        if @section.nil? or @section.empty? or @section.include? cur_sect
           name, value = line.split(/\s*=\s*|\s+/, 2)
           begin
             name, = long_option name, false

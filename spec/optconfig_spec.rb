@@ -1,5 +1,4 @@
-require "rubygems"
-require "spec"
+# -*- coding: utf-8 -*-
 require "tempfile"
 
 require "#{File.dirname __FILE__}/../lib/optconfig"
